@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2020 Google LLC
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~      https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  ~
+  ~
+  ~
+  -->
+
+<resources>
+    <color name="fireflix_black">#de000000</color>
+    <color name="fireflix_gray_50">#fafafa</color>
+    <color name="fireflix_gray_50_a600">#99fafafa</color>
+    <color name="fireflix_white">#deffffff</color>
+    <color name="fireflix_yellow_300">#f8f99f</color>
+    <color name="fireflix_yellow_500">#ffff63</color>
+    <color name="fireflix_blue">#039BE5</color>
+    <color name="fireflix_dark_blue">#006db3</color>
+    <color name="fireflix_light_blue">#58CBFF</color>
+    <color name="fireflix_very_light_blue">#C6EDFF</color>
+    <color name="fireflix_yellow">#FFCA28</color>
+    <color name="fireflix_bright_yellow">#FFCC30</color>
+    <color name="fireflix_orange">#FF9F00</color>
+    <color name="fireflix_deep_orange">#FF8A65</color>
+    <color name="fireflix_green">#00BFA5</color>
+</resources>
