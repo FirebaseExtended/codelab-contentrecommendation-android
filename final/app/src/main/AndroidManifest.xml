@@ -31,7 +31,8 @@
         android:theme="@style/Theme.FireFlix">
         <activity
             android:name="com.google.firebase.codelabs.recommendations.MainActivity"
-            android:theme="@style/Theme.FireFlix.NoActionBar">
+            android:theme="@style/Theme.FireFlix.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SEARCH" />

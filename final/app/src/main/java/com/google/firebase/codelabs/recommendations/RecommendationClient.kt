@@ -27,9 +27,10 @@ import com.google.firebase.codelabs.recommendations.data.MovieRepository
 import com.google.firebase.codelabs.recommendations.utils.Config
 import com.google.firebase.codelabs.recommendations.utils.FileUtils
 import com.google.firebase.codelabs.recommendations.utils.showToast
-import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions
-import com.google.firebase.ml.common.modeldownload.FirebaseModelManager
-import com.google.firebase.ml.custom.FirebaseCustomRemoteModel
+import com.google.firebase.ml.modeldownloader.CustomModel;
+import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions;
+import com.google.firebase.ml.modeldownloader.DownloadType;
+import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader;
 import org.tensorflow.lite.Interpreter
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -85,8 +86,10 @@ class RecommendationClient(private val context: Context, private val config: Con
             }
             if (model is ByteBuffer) {
                 tflite = Interpreter(model)
-            } else {
-                tflite = Interpreter(model as File)
+            } else if (model is CustomModel) {
+                model.file?.let {
+                    tflite = Interpreter(it)
+                }
             }
             Log.v(TAG, "TFLite model loaded.")
         }
@@ -110,7 +113,6 @@ class RecommendationClient(private val context: Context, private val config: Con
     }
 
     /** Given a list of selected items, preprocess to get tflite input.  */
-    @Synchronized
     private suspend fun preprocess(selectedMovies: List<Movie>): IntArray {
         return withContext(Dispatchers.Default) {
             val inputContext = IntArray(config.inputLength)
@@ -128,7 +130,6 @@ class RecommendationClient(private val context: Context, private val config: Con
     }
 
     /** Postprocess to gets results from tflite inference.  */
-    @Synchronized
     private suspend fun postprocess(
         outputIds: IntArray, confidences: FloatArray, selectedMovies: List<Movie>
     ): List<Result> {
@@ -163,7 +164,6 @@ class RecommendationClient(private val context: Context, private val config: Con
     }
 
     /** Given a list of selected items, and returns the recommendation results.  */
-    @Synchronized
     suspend fun recommend(selectedMovies: List<Movie>): List<Result> {
         return withContext(Dispatchers.Default) {
             val inputs = arrayOf<Any>(preprocess(selectedMovies))
@@ -189,33 +189,18 @@ class RecommendationClient(private val context: Context, private val config: Con
     }
 
     private fun downloadModel(modelName: String) {
-        val remoteModel = FirebaseCustomRemoteModel.Builder(modelName).build()
-        val firebaseModelManager = FirebaseModelManager.getInstance()
-        firebaseModelManager
-            .isModelDownloaded(remoteModel)
-            .continueWithTask { task ->
-                // Create update condition if model is already downloaded, otherwise create download
-                // condition.
-                val conditions = if (task.result != null && task.result == true) {
-                    FirebaseModelDownloadConditions.Builder()
-                        .requireWifi()
-                        .build() // Update condition that requires wifi.
+        val conditions = CustomModelDownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        FirebaseModelDownloader.getInstance()
+            .getModel(modelName, DownloadType.LOCAL_MODEL, conditions)
+            .addOnCompleteListener {
+                if (!it.isSuccessful) {
+                    showToast(context, "Failed to get model file.")
                 } else {
-                    FirebaseModelDownloadConditions.Builder().build(); // Download condition.
+                    showToast(context, "Downloaded remote model: $modelName")
+                    GlobalScope.launch { initializeInterpreter(it.result) }
                 }
-                firebaseModelManager.download(remoteModel, conditions)
-            }
-            .addOnSuccessListener {
-                firebaseModelManager.getLatestModelFile(remoteModel)
-                    .addOnCompleteListener {
-                        val model = it.result
-                        if (model == null) {
-                            showToast(context, "Failed to get model file.")
-                        } else {
-                            showToast(context, "Downloaded remote model")
-                            GlobalScope.launch { initializeInterpreter(model) }
-                        }
-                    }
             }
             .addOnFailureListener {
                 showToast(context, "Model download failed for recommendations, please check your connection.")
