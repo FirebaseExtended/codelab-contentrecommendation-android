@@ -27,9 +27,10 @@ import com.google.firebase.codelabs.recommendations.data.MovieRepository
 import com.google.firebase.codelabs.recommendations.utils.Config
 import com.google.firebase.codelabs.recommendations.utils.FileUtils
 import com.google.firebase.codelabs.recommendations.utils.showToast
-import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions
-import com.google.firebase.ml.common.modeldownload.FirebaseModelManager
-import com.google.firebase.ml.custom.FirebaseCustomRemoteModel
+import com.google.firebase.ml.modeldownloader.CustomModel;
+import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions;
+import com.google.firebase.ml.modeldownloader.DownloadType;
+import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader;
 import org.tensorflow.lite.Interpreter
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -105,7 +106,6 @@ class RecommendationClient(private val context: Context, private val config: Con
     }
 
     /** Given a list of selected items, and returns the recommendation results.  */
-    @Synchronized
     suspend fun recommend(selectedMovies: List<Movie>): List<Result> {
         // TODO: Replace this function with code from the codelab to generate recommendation using
         //  the downloaded model.
