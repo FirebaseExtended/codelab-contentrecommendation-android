@@ -84,11 +84,17 @@ class RecommendationClient(private val context: Context, private val config: Con
             tflite?.apply {
                 close()
             }
-            if (model is ByteBuffer) {
-                tflite = Interpreter(model)
-            } else if (model is CustomModel) {
-                model.file?.let {
-                    tflite = Interpreter(it)
+            when (model) {
+                is ByteBuffer -> {
+                    tflite = Interpreter(model)
+                }
+                is CustomModel -> {
+                    model.file?.let {
+                        tflite = Interpreter(it)
+                    }
+                }
+                else -> {
+                    showToast(context, "Unexpected model type downloaded.")
                 }
             }
             Log.v(TAG, "TFLite model loaded.")
